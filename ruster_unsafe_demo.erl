@@ -4,7 +4,7 @@
 -on_load(init/0).
 
 init() ->
-	Filename = hd(filelib:wildcard("target/{debug,release}/libruster_unsafe_demo*")),
+	Filename = hd(filelib:wildcard("target/{debug,release}/*ruster_unsafe_demo*")),
 	Rootname = filename:rootname(Filename),
     ok = erlang:load_nif(Rootname, 0).
 
