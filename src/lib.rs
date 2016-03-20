@@ -7,7 +7,9 @@ use std::mem::uninitialized;
 nif_init!(b"ruster_unsafe_demo\0", Some(load), Some(reload), Some(upgrade), Some(unload),
 	nif!(b"static_atom\0", 0, static_atom),
 	nif!(b"native_add\0" , 2, native_add, ERL_NIF_DIRTY_JOB_IO_BOUND),
-	nif!(b"tuple_add\0"  , 1, tuple_add, ERL_NIF_DIRTY_JOB_CPU_BOUND)
+	nif!(b"tuple_add\0"  , 1, tuple_add, ERL_NIF_DIRTY_JOB_CPU_BOUND),
+  nif!(b"time_test_1\0", 0, time_test_1)
+
 	);
 
 
@@ -85,3 +87,49 @@ extern "C" fn tuple_add(env: *mut ErlNifEnv,
     	}
 	}
 }
+
+extern "C" fn time_test_1(env: *mut ErlNifEnv,
+                        argc: c_int,
+                        args: *const ERL_NIF_TERM) -> ERL_NIF_TERM {
+  unsafe {
+
+    let monotonic_tuple = {
+      let arr = [ enif_make_int64(env, enif_monotonic_time(ErlNifTimeUnit::ERL_NIF_SEC)),
+                  enif_make_int64(env, enif_monotonic_time(ErlNifTimeUnit::ERL_NIF_MSEC)),
+                  enif_make_int64(env, enif_monotonic_time(ErlNifTimeUnit::ERL_NIF_USEC)),
+                  enif_make_int64(env, enif_monotonic_time(ErlNifTimeUnit::ERL_NIF_NSEC)),
+                  //enif_make_int64(env, enif_monotonic_time(ErlNifTimeUnit::INVALID)),
+                ];
+       enif_make_tuple_from_array(env, arr.as_ptr(), arr.len() as u32)
+    };
+
+    let offset_tuple = {
+      let arr = [ enif_make_int64(env, enif_time_offset(ErlNifTimeUnit::ERL_NIF_SEC)),
+                  enif_make_int64(env, enif_time_offset(ErlNifTimeUnit::ERL_NIF_MSEC)),
+                  enif_make_int64(env, enif_time_offset(ErlNifTimeUnit::ERL_NIF_USEC)),
+                  enif_make_int64(env, enif_time_offset(ErlNifTimeUnit::ERL_NIF_NSEC)),
+                  //enif_make_int64(env, enif_time_offset(ErlNifTimeUnit::INVALID)),
+                ];
+       enif_make_tuple_from_array(env, arr.as_ptr(), arr.len() as u32)
+    };
+
+
+    let convert_tuple = {
+      let time = 123;
+      let arr = [ enif_make_int64(env, enif_convert_time_unit(time, ErlNifTimeUnit::ERL_NIF_SEC, ErlNifTimeUnit::ERL_NIF_SEC)),
+                  enif_make_int64(env, enif_convert_time_unit(time, ErlNifTimeUnit::ERL_NIF_SEC, ErlNifTimeUnit::ERL_NIF_MSEC)),
+                  enif_make_int64(env, enif_convert_time_unit(time, ErlNifTimeUnit::ERL_NIF_SEC, ErlNifTimeUnit::ERL_NIF_USEC)),
+                  enif_make_int64(env, enif_convert_time_unit(time, ErlNifTimeUnit::ERL_NIF_SEC, ErlNifTimeUnit::ERL_NIF_NSEC)),
+                  //enif_make_int64(env, enif_convert_time_unit(time, ErlNifTimeUnit::ERL_NIF_SEC, ErlNifTimeUnit::INVALID)),
+                ];
+       enif_make_tuple_from_array(env, arr.as_ptr(), arr.len() as u32)
+    };
+
+
+    {
+      let arr = [monotonic_tuple, offset_tuple, convert_tuple];
+       enif_make_tuple_from_array(env, arr.as_ptr(), arr.len() as u32)
+    }
+  } //unsafe
+} // fn
+

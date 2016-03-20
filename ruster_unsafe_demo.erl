@@ -1,6 +1,6 @@
 -module(ruster_unsafe_demo).
 
--export([static_atom/0,native_add/2, tuple_add/1]).
+-export([static_atom/0,native_add/2, tuple_add/1, time_test_1/0]).
 -on_load(init/0).
 
 init() ->
@@ -15,4 +15,7 @@ native_add(_X, _Y) ->
     exit(nif_library_not_loaded).
 
 tuple_add(_X) ->
+    exit(nif_library_not_loaded).
+
+time_test_1() ->
     exit(nif_library_not_loaded).
